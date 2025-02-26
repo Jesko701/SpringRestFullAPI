@@ -28,25 +28,28 @@ public class UserService {
     private Validator validator;
 
     @Async
-    @Transactional
     public CompletableFuture<Void> register(RegisterUserRequest request) {
         return CompletableFuture.runAsync(() -> {
-            Set<ConstraintViolation<RegisterUserRequest>> constraintViolations = validator.validate(request);
-            if (constraintViolations.size() != 0){
-                // error
-                throw new ConstraintViolationException(constraintViolations);
-            }
-    
-            if (userRepository.existsById(request.getUsername())){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Username already registered");
-            }
-    
-            User user = new User();
-            user.setUsername(request.getUsername());
-            user.setPassword(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()));
-            user.setName(request.getName());
-    
-            userRepository.save(user);
+            saveUser(request); // Calls the transactional method
         });
+    }
+
+    @Transactional // Ensures database operations are properly managed
+    public void saveUser(RegisterUserRequest request) {
+        Set<ConstraintViolation<RegisterUserRequest>> constraintViolations = validator.validate(request);
+        if (!constraintViolations.isEmpty()) {
+            throw new ConstraintViolationException(constraintViolations);
+        }
+
+        if (userRepository.existsById(request.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already registered");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()));
+        user.setName(request.getName());
+
+        userRepository.save(user);
     }
 }
