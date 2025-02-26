@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,16 +46,48 @@ public class UserControllersTest {
         request.setPassword("rahasia");
         request.setName("Test");
 
-        mockMvc.perform(post("/api/users")
+        // Perform the request and handle async response
+        MvcResult mvcResult = mockMvc.perform(post("/api/users")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))).andExpectAll(status().isOk())
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpectAll(request().asyncStarted()) // Ensure async processing starts
+                .andReturn();
+
+        // Dispatch the async result and assert the response
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpectAll(status().isOk())
                 .andDo(result -> {
-                    WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(),
+                    WebResponse<String> response = objectMapper.readValue(
+                            result.getResponse().getContentAsString(),
                             new TypeReference<>() {
                             });
                     assertEquals("OK", response.getData());
                 });
+    }
 
+    @Test
+    void testRegisterBadRequest() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest();
+        request.setUsername("");
+        request.setPassword("");
+        request.setName("");
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpectAll(request().asyncStarted()) // Ensure async processing starts
+                .andReturn();
+
+        // Dispatch the async result and assert the response
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpectAll(status().isBadRequest())
+                .andDo(result -> {
+                    WebResponse<String> response = objectMapper.readValue(
+                            result.getResponse().getContentAsString(),
+                            new TypeReference<>() {});
+                    assertNotNull(response.getErrors());
+                });
     }
 }
