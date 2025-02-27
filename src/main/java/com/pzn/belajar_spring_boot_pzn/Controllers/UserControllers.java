@@ -11,10 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.pzn.belajar_spring_boot_pzn.Entity.User;
 import com.pzn.belajar_spring_boot_pzn.Service.UserService;
 import com.pzn.belajar_spring_boot_pzn.model.RegisterUserRequest;
+import com.pzn.belajar_spring_boot_pzn.model.UpdateUserRequest;
+import com.pzn.belajar_spring_boot_pzn.model.UserResponse;
 import com.pzn.belajar_spring_boot_pzn.model.WebResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("api/users")
@@ -40,4 +45,17 @@ public class UserControllers {
                     }
                 });
     }
+
+    @GetMapping(path = "current", produces = MediaType.APPLICATION_JSON_VALUE)
+    public WebResponse<UserResponse> get(User user) {
+        UserResponse userResponse = userService.get(user);
+        return WebResponse.<UserResponse>builder().data(userResponse).build();
+    }
+
+    @PatchMapping(path = "current", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public WebResponse<UserResponse> update(User user, @RequestBody UpdateUserRequest request) {
+        UserResponse userResponse = userService.update(user, request);
+        return WebResponse.<UserResponse>builder().data(userResponse).build();
+    }
+
 }
