@@ -13,7 +13,7 @@ import com.pzn.belajar_spring_boot_pzn.Security.BCrypt;
 import com.pzn.belajar_spring_boot_pzn.model.LoginUserRequest;
 import com.pzn.belajar_spring_boot_pzn.model.TokenResponse;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {

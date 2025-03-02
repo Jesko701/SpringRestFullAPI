@@ -16,7 +16,7 @@ import com.pzn.belajar_spring_boot_pzn.model.RegisterUserRequest;
 import com.pzn.belajar_spring_boot_pzn.model.UpdateUserRequest;
 import com.pzn.belajar_spring_boot_pzn.model.UserResponse;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     @Autowired

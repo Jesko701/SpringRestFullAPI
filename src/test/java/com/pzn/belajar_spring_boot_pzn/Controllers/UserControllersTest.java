@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pzn.belajar_spring_boot_pzn.Entity.User;
+import com.pzn.belajar_spring_boot_pzn.Repositories.ContactRepository;
 import com.pzn.belajar_spring_boot_pzn.Repositories.UserRepository;
 import com.pzn.belajar_spring_boot_pzn.Security.BCrypt;
 import com.pzn.belajar_spring_boot_pzn.model.RegisterUserRequest;
@@ -34,10 +35,14 @@ public class UserControllersTest {
         private UserRepository userRepository;
 
         @Autowired
+        private ContactRepository contactRepository;
+
+        @Autowired
         private ObjectMapper objectMapper;
 
         @BeforeEach
         void setUp() {
+                contactRepository.deleteAll();
                 userRepository.deleteAll();
         }
 
