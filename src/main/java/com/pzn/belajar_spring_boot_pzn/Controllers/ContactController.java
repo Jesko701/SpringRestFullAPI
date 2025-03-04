@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("api/contacts")
@@ -33,6 +35,7 @@ public class ContactController {
     private ContactService contactService;
 
     @PostMapping(path = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public WebResponse<ContactResponse> create(User user, @RequestBody CreateContactRequest request) {
         ContactResponse contactResponse = contactService.create(user, request);
         return WebResponse.<ContactResponse>builder().data(contactResponse).build();

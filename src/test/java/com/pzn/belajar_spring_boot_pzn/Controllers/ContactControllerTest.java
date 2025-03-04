@@ -99,7 +99,7 @@ public class ContactControllerTest {
                                                 .content(objectMapper.writeValueAsString(request))
                                                 .header("X-API-TOKEN", "contactTest"))
                                 .andExpectAll(
-                                                status().isOk())
+                                                status().isCreated())
                                 .andDo(result -> {
                                         WebResponse<ContactResponse> response = objectMapper.readValue(
                                                         result.getResponse().getContentAsString(),

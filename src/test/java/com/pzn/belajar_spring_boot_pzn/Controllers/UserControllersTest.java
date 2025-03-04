@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.pzn.belajar_spring_boot_pzn.Entity.User;
+import com.pzn.belajar_spring_boot_pzn.Repositories.AddressRepository;
 import com.pzn.belajar_spring_boot_pzn.Repositories.ContactRepository;
 import com.pzn.belajar_spring_boot_pzn.Repositories.UserRepository;
 import com.pzn.belajar_spring_boot_pzn.Security.BCrypt;
@@ -35,6 +36,9 @@ public class UserControllersTest {
         private UserRepository userRepository;
 
         @Autowired
+        private AddressRepository addressRepository;
+
+        @Autowired
         private ContactRepository contactRepository;
 
         @Autowired
@@ -42,6 +46,7 @@ public class UserControllersTest {
 
         @BeforeEach
         void setUp() {
+                addressRepository.deleteAll();
                 contactRepository.deleteAll();
                 userRepository.deleteAll();
         }
@@ -63,7 +68,7 @@ public class UserControllersTest {
 
                 // Dispatch the async result and assert the response
                 mockMvc.perform(asyncDispatch(mvcResult))
-                                .andExpectAll(status().isOk())
+                                .andExpectAll(status().isCreated())
                                 .andDo(result -> {
                                         WebResponse<String> response = objectMapper.readValue(
                                                         result.getResponse().getContentAsString(),
