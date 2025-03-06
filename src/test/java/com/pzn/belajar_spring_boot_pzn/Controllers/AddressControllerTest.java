@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
@@ -272,6 +273,118 @@ public class AddressControllerTest {
                                                         assertEquals(request.getStreet(),
                                                                         response.getData().getStreet());
                                                         assertEquals(request.getCity(), response.getData().getCity());
+                                                });
+        }
+
+        @Test
+        void testDeleteAddressNotFound() throws Exception {
+                mockMvc.perform(
+                                delete("/api/contacts/test/addresses/test")
+                                                .accept(MediaType.APPLICATION_JSON)
+                                                .header("X-API-TOKEN", "addressTest")
+                                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpectAll(
+                                                status().isNotFound())
+                                .andDo(
+                                                result -> {
+                                                        WebResponse<String> response = objectMapper
+                                                                        .readValue(result.getResponse()
+                                                                                        .getContentAsString(),
+                                                                                        new TypeReference<>() {
+                                                                                        });
+                                                        assertNotNull(response.getErrors());
+                                                });
+        }
+
+        @Test
+        void testDeleteAddressSuccess() throws Exception {
+                Contact contact = contactRepository.findById("test").orElseThrow();
+
+                Address address = new Address();
+                address.setContactId(contact);
+                address.setCity("Jakarta");
+                address.setCountry("Indonesia");
+                address.setId(UUID.randomUUID().toString());
+                address.setPostalCode("1028379710");
+                address.setProvince("DKIJakarta");
+                address.setStreet("Road Palindrom");
+                addressRepository.save(address);
+
+                log.info(address.getId());
+
+                mockMvc.perform(
+                                delete("/api/contacts/test/addresses/" + address.getId())
+                                                .accept(MediaType.APPLICATION_JSON)
+                                                .header("X-API-TOKEN", "addressTest")
+                                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpectAll(
+                                                status().isOk())
+                                .andDo(
+                                                result -> {
+                                                        WebResponse<String> response = objectMapper
+                                                                        .readValue(result.getResponse()
+                                                                                        .getContentAsString(),
+                                                                                        new TypeReference<>() {
+                                                                                        });
+                                                        assertNull(response.getErrors());
+                                                        assertEquals("OK", response.getData());
+
+                                                        assertFalse(addressRepository.existsById("test"));
+                                                });
+        }
+
+        @Test
+        void testListAddressNotFound() throws Exception {
+                mockMvc.perform(
+                                get("/api/contacts/salah/addresses")
+                                                .accept(MediaType.APPLICATION_JSON)
+                                                .header("X-API-TOKEN", "addressTest")
+                                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpectAll(
+                                                status().isNotFound())
+                                .andDo(
+                                                result -> {
+                                                        WebResponse<String> response = objectMapper
+                                                                        .readValue(result.getResponse()
+                                                                                        .getContentAsString(),
+                                                                                        new TypeReference<>() {
+                                                                                        });
+                                                        assertNotNull(response.getErrors());
+                                                });
+        }
+
+        @Test
+        void testListAddressSuccess() throws Exception {
+                Contact contact = contactRepository.findById("test").orElseThrow();
+
+                for (int i = 0; i < 5; i++) {
+                        Address address = new Address();
+                        address.setContactId(contact);
+                        address.setCity("Jakarta");
+                        address.setCountry("Indonesia");
+                        address.setId("address-" + i);
+                        address.setPostalCode("1028379710");
+                        address.setProvince("DKIJakarta");
+                        address.setStreet("Road Palindrom");
+                        addressRepository.save(address);
+                }
+
+                mockMvc.perform(
+                                get("/api/contacts/test/addresses")
+                                                .accept(MediaType.APPLICATION_JSON)
+                                                .header("X-API-TOKEN", "addressTest")
+                                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpectAll(
+                                                status().isOk())
+                                .andDo(
+                                                result -> {
+                                                        WebResponse<List<AddressResponse>> response = objectMapper
+                                                                        .readValue(result.getResponse()
+                                                                                        .getContentAsString(),
+                                                                                        new TypeReference<>() {
+                                                                                        });
+                                                        assertNull(response.getErrors());
+                                                        assertEquals(5, response.getData().size());
                                                 });
         }
 }

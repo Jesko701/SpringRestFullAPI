@@ -9,6 +9,8 @@ import com.pzn.belajar_spring_boot_pzn.model.CreateAddressRequest;
 import com.pzn.belajar_spring_boot_pzn.model.UpdateAddressRequest;
 import com.pzn.belajar_spring_boot_pzn.model.WebResponse;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -52,5 +55,20 @@ public class AddressController {
         request.setAddressId(addressId);
         AddressResponse addressResponse = addressService.update(user, request);
         return WebResponse.<AddressResponse>builder().data(addressResponse).build();
+    }
+
+    @DeleteMapping(path = "api/contacts/{contactId}/addresses/{addressId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public WebResponse<String> remove(User user,
+            @PathVariable("contactId") String contactId,
+            @PathVariable("addressId") String addressId) {
+        addressService.remove(user, contactId, addressId);
+        return WebResponse.<String>builder().data("OK").build();
+    }
+
+    @GetMapping(path = "api/contacts/{contactId}/addresses", produces = MediaType.APPLICATION_JSON_VALUE)
+    public WebResponse<List<AddressResponse>> list(User user,
+            @PathVariable("contactId") String contactId) {
+        List<AddressResponse> addressResponse = addressService.list(user, contactId);
+        return WebResponse.<List<AddressResponse>>builder().data(addressResponse).build();
     }
 }

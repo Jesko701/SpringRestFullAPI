@@ -1,5 +1,6 @@
 package com.pzn.belajar_spring_boot_pzn.Repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,5 @@ import com.pzn.belajar_spring_boot_pzn.Entity.Contact;
 @Repository
 public interface AddressRepository extends JpaRepository<Address,String>  {
     Optional<Address> findFirstByContactIdAndId(Contact contact, String id);
+    Optional<List<Address>> findAllByContactId(Contact id);
 }
